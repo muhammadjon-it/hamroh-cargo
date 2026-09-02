@@ -10,7 +10,6 @@
     <link rel="preload" as="image" href="./images/hero.section.png" fetchpriority="high">
     <link rel="preload" as="image" href="./images/hamroh.logo.png">
 
-    <link rel="stylesheet" href="./css/input.css">
     <link rel="stylesheet" href="./css/output.css">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -27,10 +26,6 @@
         }
     </style>
 </head>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="./js/main.js"></script>
-
 
 <body>
 
@@ -112,7 +107,7 @@
                 <div class="w-[250px] lg:w-[900px]  ">
 
                     <span
-                        class="text-[9px] lg:text-[16px] inline-flex gap-1 lg:gap-3  bg-white/50 bg-transparent backdrop-blur-[20px]  text-blue-700 px-3 lg:px-5 py-1 lg:py-2 rounded-full font-semibold mb-5 w-[200px] lg:w-[380px]">
+                        class=" text-[9px] lg:text-[16px] inline-flex gap-1 lg:gap-3  bg-white/50 bg-transparent backdrop-blur-[20px]  text-blue-700 px-3 lg:px-5 py-1 lg:py-2 rounded-full font-semibold mb-5 w-[200px] lg:w-[380px]">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class=" w-3 lg:w-7  h-3 lg:h-7"
                             fill="#FACC15">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -1089,6 +1084,344 @@
                             </div>
                         </aside>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="calculator" data-cargo-calculator aria-labelledby="calculator-title"
+            class="cargo-calculator-section relative scroll-mt-28 overflow-hidden">
+
+            <div aria-hidden="true" class="cargo-calculator-orb cargo-calculator-orb-left">
+            </div>
+
+            <div aria-hidden="true" class="cargo-calculator-orb cargo-calculator-orb-right">
+            </div>
+
+            <div class="cargo-calculator-shell">
+
+                <!-- Сарлавҳа -->
+                <div class="cargo-calculator-heading">
+                    <p class="cargo-calculator-kicker">
+
+                        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                        Ҳисоби шаффофи бор
+                    </p>
+
+                    <h2 id="calculator-title" class="cargo-calculator-title">
+
+                        Калкулятори
+
+                        <span>
+                            боркашонӣ
+                        </span>
+                    </h2>
+
+                    <p class="cargo-calculator-subtitle">
+                        Филиал, андоза ва вазни борро ворид кунед —
+                        нархи тахминӣ фавран ҳисоб мешавад.
+                    </p>
+                </div>
+
+                <div class="cargo-calculator-layout">
+
+                    <!-- Форма -->
+                    <form data-calc-form class="cargo-calc-form" novalidate>
+
+                        <!-- Филиал -->
+                        <fieldset data-calc-group="branch" class="cargo-calc-group scroll-mt-28">
+
+                            <legend class="cargo-calc-legend">
+                                <span class="cargo-calc-step-number">1</span>
+
+                                <span>
+                                    <strong>Филиалро интихоб кунед</strong>
+                                    <small>Филиали қабулкунандаи бор</small>
+                                </span>
+                            </legend>
+
+                            <div class="cargo-calc-branch-grid" role="radiogroup" aria-label="Интихоби филиал">
+
+                                <button type="button" role="radio" aria-checked="false" data-calc-branch="dushanbe"
+                                    class="cargo-calc-choice">
+                                    <strong>Душанбе</strong>
+                                    <span>Авто + Авиа</span>
+                                </button>
+
+                                <button type="button" role="radio" aria-checked="false" data-calc-branch="hamadoni"
+                                    class="cargo-calc-choice">
+                                    <strong>Ҳамадонӣ</strong>
+                                    <span>Авто</span>
+                                </button>
+
+                                <button type="button" role="radio" aria-checked="false" data-calc-branch="bokhtar"
+                                    class="cargo-calc-choice">
+                                    <strong>Бохтар</strong>
+                                    <span>Авто</span>
+                                </button>
+
+                                <button type="button" role="radio" aria-checked="false" data-calc-branch="khujand"
+                                    class="cargo-calc-choice">
+                                    <strong>Хуҷанд</strong>
+                                    <span>Авто</span>
+                                </button>
+                            </div>
+
+                            <p data-calc-error="branch" class="cargo-calc-error" role="alert" hidden>
+                            </p>
+                        </fieldset>
+
+                        <!-- Намуди интиқол: танҳо Душанбе -->
+                        <fieldset data-calc-group="mode" data-calc-mode-group class="cargo-calc-group scroll-mt-28"
+                            hidden>
+
+                            <legend class="cargo-calc-legend">
+                                <span class="cargo-calc-step-number">2</span>
+
+                                <span>
+                                    <strong>Тарзи интиқол</strong>
+                                    <small>Авто ё ҳавоӣ</small>
+                                </span>
+                            </legend>
+
+                            <div class="cargo-calc-mode-grid" role="radiogroup" aria-label="Интихоби тарзи интиқол">
+
+                                <button type="button" role="radio" aria-checked="false" data-calc-mode="auto"
+                                    class="cargo-calc-mode">
+
+                                    <span class="cargo-calc-mode-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            aria-hidden="true">
+                                            <path d="M3 6h11v10H3V6Z"></path>
+                                            <path d="M14 10h3l3 3v3h-6v-6Z"></path>
+                                            <circle cx="7" cy="18" r="2"></circle>
+                                            <circle cx="17" cy="18" r="2"></circle>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        <strong>Авто</strong>
+                                        <small>15–25 рӯз</small>
+                                    </span>
+                                </button>
+
+                                <button type="button" role="radio" aria-checked="false" data-calc-mode="air"
+                                    class="cargo-calc-mode">
+
+                                    <span class="cargo-calc-mode-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21 13 13.5l7.5-2.5c1.8-.6
+                                           1.8-3.1 0-3.7L13 4.8 10.5 1
+                                           8.8 1.6 10 6.4 4.5 8.2 2.2
+                                           6.5 1 7.6l2.4 4.1L10 13.6
+                                           8.8 20.4 10.5 21Z">
+                                            </path>
+                                        </svg>
+                                    </span>
+
+                                    <span>
+                                        <strong>Авиа</strong>
+                                        <small>2–10 рӯз</small>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <p data-calc-error="mode" class="cargo-calc-error" role="alert" hidden>
+                            </p>
+                        </fieldset>
+
+                        <!-- Андозаҳо -->
+                        <fieldset data-calc-group="dimensions" class="cargo-calc-group scroll-mt-28">
+
+                            <div class="cargo-calc-dimension-header">
+                                <legend class="cargo-calc-legend">
+                                    <span class="cargo-calc-step-number">3</span>
+
+                                    <span>
+                                        <strong>Андозаи бор</strong>
+                                        <small>Дарозӣ, бар ва баландӣ</small>
+                                    </span>
+                                </legend>
+
+                                <div class="cargo-calc-unit-switch" role="radiogroup" aria-label="Воҳиди андоза">
+
+                                    <button type="button" role="radio" aria-checked="false" data-calc-unit="mm">
+                                        мм
+                                    </button>
+
+                                    <button type="button" role="radio" aria-checked="true" data-calc-unit="cm">
+                                        см
+                                    </button>
+
+                                    <button type="button" role="radio" aria-checked="false" data-calc-unit="m">
+                                        м
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="cargo-calc-dimensions">
+                                <label class="cargo-calc-field">
+                                    <span>Дарозӣ</span>
+
+                                    <span class="cargo-calc-input-wrap">
+                                        <input data-calc-length type="text" inputmode="decimal" autocomplete="off"
+                                            placeholder="100" aria-describedby="cargo-dimensions-error">
+
+                                        <small data-dimension-unit-label>см</small>
+                                    </span>
+                                </label>
+
+                                <label class="cargo-calc-field">
+                                    <span>Бар</span>
+
+                                    <span class="cargo-calc-input-wrap">
+                                        <input data-calc-width type="text" inputmode="decimal" autocomplete="off"
+                                            placeholder="50" aria-describedby="cargo-dimensions-error">
+
+                                        <small data-dimension-unit-label>см</small>
+                                    </span>
+                                </label>
+
+                                <label class="cargo-calc-field">
+                                    <span>Баландӣ</span>
+
+                                    <span class="cargo-calc-input-wrap">
+                                        <input data-calc-height type="text" inputmode="decimal" autocomplete="off"
+                                            placeholder="40" aria-describedby="cargo-dimensions-error">
+
+                                        <small data-dimension-unit-label>см</small>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <p id="cargo-dimensions-error" data-calc-error="dimensions" class="cargo-calc-error"
+                                role="alert" hidden>
+                            </p>
+
+                            <p data-air-calculation-hint class="cargo-calc-hint" hidden>
+                                Андозаҳо ҳатмӣ мебошанд, аммо нархи Авиа ҳоло
+                                танҳо аз рӯи вазн ҳисоб мешавад.
+                            </p>
+                        </fieldset>
+
+                        <!-- Вазн -->
+                        <fieldset data-calc-group="weight" class="cargo-calc-group scroll-mt-28">
+
+                            <legend class="cargo-calc-legend">
+                                <span class="cargo-calc-step-number">4</span>
+
+                                <span>
+                                    <strong>Вазни бор</strong>
+                                    <small>Вазни умумиро ворид кунед</small>
+                                </span>
+                            </legend>
+
+                            <label class="cargo-calc-field">
+                                <span>Вазн бо килограмм</span>
+
+                                <span class="cargo-calc-input-wrap">
+                                    <input data-calc-weight type="text" inputmode="decimal" autocomplete="off"
+                                        placeholder="Мисол: 25" aria-describedby="cargo-weight-error">
+
+                                    <small>кг</small>
+                                </span>
+                            </label>
+
+                            <p id="cargo-weight-error" data-calc-error="weight" class="cargo-calc-error" role="alert"
+                                hidden>
+                            </p>
+                        </fieldset>
+
+                        <button type="submit" class="cargo-calc-submit">
+                            Ҳисоб кардани нарх
+                            <span aria-hidden="true">→</span>
+                        </button>
+
+                        <p class="text-center text-xs leading-5 text-slate-400">
+                            Натиҷа тахминӣ аст. Пеш аз супоридани бор
+                            нархи ниҳоиро бо филиал тасдиқ кунед.
+                        </p>
+                    </form>
+
+                    <!-- Натиҷа -->
+                    <aside data-calc-result class="cargo-calc-result-column" aria-live="polite">
+
+                        <div data-result-card class="cargo-calc-result-card">
+
+                            <!-- Ҳолати аввал -->
+                            <div data-result-empty class="cargo-calc-empty">
+                                <span class="cargo-calc-empty-icon">₸</span>
+
+                                <p>Натиҷаи ҳисоб</p>
+
+                                <h3>
+                                    Маълумотро пур кунед
+                                </h3>
+
+                                <span>
+                                    Филиал, андоза ва вазни борро ворид кунед,
+                                    то нарх дар ин ҷо пайдо шавад.
+                                </span>
+                            </div>
+
+                            <!-- Натиҷаи тайёр -->
+                            <div data-result-success hidden>
+                                <p class="cargo-calc-result-label">
+                                    Нархи тахминӣ
+                                </p>
+
+                                <p data-result-amount class="cargo-calc-result-amount">
+                                    0 сомонӣ
+                                </p>
+
+                                <span data-result-method class="cargo-calc-method" data-method="weight">
+                                    Бо вазн ҳисоб шуд
+                                </span>
+
+                                <p data-result-meta class="cargo-calc-result-meta">
+                                </p>
+
+                                <div class="cargo-calc-breakdown">
+                                    <div>
+                                        <span data-result-weight-label>
+                                            Ҳисоби вазн
+                                        </span>
+
+                                        <strong data-result-weight-value>
+                                            0 сомонӣ
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        <span data-result-volume-label>
+                                            Ҳисоби ҳаҷм
+                                        </span>
+
+                                        <strong data-result-volume-value>
+                                            0 сомонӣ
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <p data-result-message class="cargo-calc-result-message">
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="cargo-calc-formula">
+                            <strong>Тарзи ҳисоб</strong>
+
+                            <p>
+                                Авто: нархи вазн ва ҳаҷм муқоиса мешавад.
+                                Кадоме бештар бошад, ҳамон маблағ гирифта мешавад.
+                            </p>
+
+                            <p>
+                                Авиа: ҳоло танҳо
+                                <strong>79 сомонӣ × кг</strong>.
+                            </p>
+                        </div>
+                    </aside>
                 </div>
             </div>
         </section>

@@ -1021,3 +1021,812 @@ if (document.readyState === "loading") {
 } else {
     initTariffsSection();
 }
+function initCargoCalculator() {
+    const root =
+        document.querySelector("[data-cargo-calculator]");
+
+    if (
+        !root ||
+        root.dataset.cargoCalculatorReady === "true"
+    ) {
+        return;
+    }
+
+    root.dataset.cargoCalculatorReady = "true";
+
+    const tariffs = {
+        dushanbe: {
+            name: "Душанбе",
+
+            auto: {
+                eta: "15–25 рӯз",
+                volumeRate: 2590,
+
+                tiers: [
+                    { max: 30, rate: 27.5 },
+                    { max: 50, rate: 26.5 },
+                    { max: 100, rate: 25.5 },
+                    { max: 500, rate: 22 },
+                    { max: 1000, rate: 17 }
+                ]
+            },
+
+            air: {
+                eta: "2–10 рӯз",
+                rate: 79
+            }
+        },
+
+        hamadoni: {
+            name: "Ҳамадонӣ",
+
+            auto: {
+                eta: "15–25 рӯз",
+                volumeRate: 2650,
+
+                tiers: [
+                    { max: 30, rate: 28.5 },
+                    { max: 50, rate: 27 },
+                    { max: 100, rate: 26 },
+                    { max: 500, rate: 23 },
+                    { max: Infinity, rate: 20 }
+                ]
+            }
+        },
+
+        bokhtar: {
+            name: "Бохтар",
+
+            auto: {
+                eta: "15–25 рӯз",
+                volumeRate: 2650,
+
+                tiers: [
+                    { max: 30, rate: 28.5 },
+                    { max: 50, rate: 27 },
+                    { max: 100, rate: 26 },
+                    { max: 500, rate: 23 },
+                    { max: Infinity, rate: 20 }
+                ]
+            }
+        },
+
+        khujand: {
+            name: "Хуҷанд",
+
+            auto: {
+                eta: "15–25 рӯз",
+                volumeRate: 2590,
+
+                tiers: [
+                    { max: 30, rate: 28.5 },
+                    { max: 50, rate: 27 },
+                    { max: 100, rate: 26 },
+                    { max: Infinity, rate: 23 }
+                ]
+            }
+        }
+    };
+
+    const unitFactors = {
+        mm: 0.001,
+        cm: 0.01,
+        m: 1
+    };
+
+    const unitLabels = {
+        mm: "мм",
+        cm: "см",
+        m: "м"
+    };
+
+    const modeLabels = {
+        auto: "Авто",
+        air: "Авиа"
+    };
+
+    const state = {
+        branch: null,
+        mode: null,
+        unit: "cm",
+        attempted: false,
+        hasResult: false
+    };
+
+    const form =
+        root.querySelector("[data-calc-form]");
+
+    const branchButtons = [
+        ...root.querySelectorAll("[data-calc-branch]")
+    ];
+
+    const modeButtons = [
+        ...root.querySelectorAll("[data-calc-mode]")
+    ];
+
+    const unitButtons = [
+        ...root.querySelectorAll("[data-calc-unit]")
+    ];
+
+    const modeGroup =
+        root.querySelector("[data-calc-mode-group]");
+
+    const airHint =
+        root.querySelector("[data-air-calculation-hint]");
+
+    const inputs = {
+        length: root.querySelector("[data-calc-length]"),
+        width: root.querySelector("[data-calc-width]"),
+        height: root.querySelector("[data-calc-height]"),
+        weight: root.querySelector("[data-calc-weight]")
+    };
+
+    const resultCard =
+        root.querySelector("[data-result-card]");
+
+    const resultEmpty =
+        root.querySelector("[data-result-empty]");
+
+    const resultSuccess =
+        root.querySelector("[data-result-success]");
+
+    const resultAmount =
+        root.querySelector("[data-result-amount]");
+
+    const resultMethod =
+        root.querySelector("[data-result-method]");
+
+    const resultMeta =
+        root.querySelector("[data-result-meta]");
+
+    const resultWeightLabel =
+        root.querySelector("[data-result-weight-label]");
+
+    const resultWeightValue =
+        root.querySelector("[data-result-weight-value]");
+
+    const resultVolumeLabel =
+        root.querySelector("[data-result-volume-label]");
+
+    const resultVolumeValue =
+        root.querySelector("[data-result-volume-value]");
+
+    const resultMessage =
+        root.querySelector("[data-result-message]");
+
+    const moneyFormatter =
+        new Intl.NumberFormat("ru-RU", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+    const numberFormatter =
+        new Intl.NumberFormat("ru-RU", {
+            maximumFractionDigits: 2
+        });
+
+    const volumeFormatter =
+        new Intl.NumberFormat("ru-RU", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6
+        });
+
+    function parsePositiveNumber(rawValue) {
+        const raw =
+            String(rawValue ?? "").trim();
+
+        if (!raw) {
+            return {
+                valid: false,
+                empty: true,
+                value: null
+            };
+        }
+
+        const normalized =
+            raw.replace(",", ".");
+
+        if (
+            !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(
+                normalized
+            )
+        ) {
+            return {
+                valid: false,
+                empty: false,
+                value: null
+            };
+        }
+
+        const value =
+            Number(normalized);
+
+        return {
+            valid:
+                Number.isFinite(value) &&
+                value > 0,
+
+            empty: false,
+            value
+        };
+    }
+
+    function clearErrors() {
+        root
+            .querySelectorAll(".has-error")
+            .forEach((group) => {
+                group.classList.remove("has-error");
+            });
+
+        root
+            .querySelectorAll(".is-invalid")
+            .forEach((element) => {
+                element.classList.remove("is-invalid");
+                element.removeAttribute("aria-invalid");
+            });
+
+        root
+            .querySelectorAll("[data-calc-error]")
+            .forEach((error) => {
+                error.textContent = "";
+                error.hidden = true;
+            });
+    }
+
+    function showErrors(errors, focusFirst = false) {
+        clearErrors();
+
+        const shownGroups = new Set();
+
+        errors.forEach((error) => {
+            const group =
+                root.querySelector(
+                    `[data-calc-group="${error.group}"]`
+                );
+
+            group?.classList.add("has-error");
+
+            error.targets.forEach((target) => {
+                target?.classList.add("is-invalid");
+                target?.setAttribute(
+                    "aria-invalid",
+                    "true"
+                );
+            });
+
+            if (!shownGroups.has(error.group)) {
+                const output =
+                    root.querySelector(
+                        `[data-calc-error="${error.group}"]`
+                    );
+
+                if (output) {
+                    output.textContent =
+                        error.message;
+
+                    output.hidden = false;
+                }
+
+                shownGroups.add(error.group);
+            }
+        });
+
+        if (
+            focusFirst &&
+            errors.length > 0
+        ) {
+            const target =
+                errors[0].targets[0];
+
+            const reduceMotion =
+                window.matchMedia(
+                    "(prefers-reduced-motion: reduce)"
+                ).matches;
+
+            target?.scrollIntoView({
+                behavior:
+                    reduceMotion
+                        ? "auto"
+                        : "smooth",
+
+                block: "center"
+            });
+
+            window.setTimeout(() => {
+                target?.focus({
+                    preventScroll: true
+                });
+            }, reduceMotion ? 0 : 350);
+        }
+    }
+
+    function syncControls() {
+        branchButtons.forEach((button) => {
+            button.setAttribute(
+                "aria-checked",
+                String(
+                    button.dataset.calcBranch ===
+                    state.branch
+                )
+            );
+        });
+
+        const isDushanbe =
+            state.branch === "dushanbe";
+
+        modeGroup.hidden =
+            !isDushanbe;
+
+        modeButtons.forEach((button) => {
+            button.setAttribute(
+                "aria-checked",
+                String(
+                    button.dataset.calcMode ===
+                    state.mode
+                )
+            );
+        });
+
+        unitButtons.forEach((button) => {
+            button.setAttribute(
+                "aria-checked",
+                String(
+                    button.dataset.calcUnit ===
+                    state.unit
+                )
+            );
+        });
+
+        root
+            .querySelectorAll(
+                "[data-dimension-unit-label]"
+            )
+            .forEach((label) => {
+                label.textContent =
+                    unitLabels[state.unit];
+            });
+
+        airHint.hidden =
+            !(
+                state.branch === "dushanbe" &&
+                state.mode === "air"
+            );
+    }
+
+    function validate() {
+        const errors = [];
+
+        if (!state.branch) {
+            errors.push({
+                group: "branch",
+                message:
+                    "Аввал филиалро интихоб кунед.",
+                targets: branchButtons
+            });
+        }
+
+        if (
+            state.branch === "dushanbe" &&
+            !state.mode
+        ) {
+            errors.push({
+                group: "mode",
+                message:
+                    "Тарзи интиқолро интихоб кунед.",
+                targets: modeButtons
+            });
+        }
+
+        const parsedDimensions = {
+            length:
+                parsePositiveNumber(
+                    inputs.length.value
+                ),
+
+            width:
+                parsePositiveNumber(
+                    inputs.width.value
+                ),
+
+            height:
+                parsePositiveNumber(
+                    inputs.height.value
+                )
+        };
+
+        const invalidDimensionInputs =
+            Object.entries(parsedDimensions)
+                .filter(([, parsed]) => {
+                    return !parsed.valid;
+                })
+                .map(([key]) => inputs[key]);
+
+        if (
+            invalidDimensionInputs.length > 0
+        ) {
+            errors.push({
+                group: "dimensions",
+                message:
+                    "Дарозӣ, бар ва баландии борро пурра ворид кунед.",
+                targets:
+                    invalidDimensionInputs
+            });
+        }
+
+        const parsedWeight =
+            parsePositiveNumber(
+                inputs.weight.value
+            );
+
+        if (
+            !parsedWeight.valid ||
+            parsedWeight.value < 1
+        ) {
+            errors.push({
+                group: "weight",
+                message:
+                    parsedWeight.empty
+                        ? "Вазни борро ворид кунед."
+                        : "Вазн бояд на кам аз 1 кг бошад.",
+
+                targets: [inputs.weight]
+            });
+        }
+
+        if (
+            state.branch === "dushanbe" &&
+            state.mode === "auto" &&
+            parsedWeight.valid &&
+            parsedWeight.value > 1000
+        ) {
+            errors.push({
+                group: "weight",
+                message:
+                    "Барои бори зиёда аз 1000 кг бо филиали Душанбе тамос гиред.",
+
+                targets: [inputs.weight]
+            });
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors,
+
+            values: {
+                length:
+                    parsedDimensions.length.value,
+
+                width:
+                    parsedDimensions.width.value,
+
+                height:
+                    parsedDimensions.height.value,
+
+                weight:
+                    parsedWeight.value
+            }
+        };
+    }
+
+    function calculate(values) {
+        const branch =
+            tariffs[state.branch];
+
+        const mode =
+            state.branch === "dushanbe"
+                ? state.mode
+                : "auto";
+
+        const factor =
+            unitFactors[state.unit];
+
+        const volumeM3 =
+            values.length *
+            values.width *
+            values.height *
+            Math.pow(factor, 3);
+
+        if (
+            state.branch === "dushanbe" &&
+            mode === "air"
+        ) {
+            const rate =
+                branch.air.rate;
+
+            const weightCost =
+                values.weight * rate;
+
+            return {
+                method: "weight",
+                total: weightCost,
+                weightCost,
+                volumeCost: null,
+                volumeM3,
+                rate,
+                branch,
+                mode,
+                eta: branch.air.eta,
+                values,
+
+                message:
+                    "Бори шумо аз рӯи вазн ҳисоб шуд. Андозаҳо ба нархи Авиа ҳоло таъсир намекунанд."
+            };
+        }
+
+        const autoTariff =
+            branch.auto;
+
+        const tier =
+            autoTariff.tiers.find((item) => {
+                return values.weight <= item.max;
+            });
+
+        const rate =
+            tier.rate;
+
+        const weightCost =
+            values.weight * rate;
+
+        const volumeCost =
+            volumeM3 *
+            autoTariff.volumeRate;
+
+        const useVolume =
+            volumeCost > weightCost;
+
+        const costsEqual =
+            Math.abs(
+                volumeCost - weightCost
+            ) < 0.005;
+
+        return {
+            method:
+                useVolume
+                    ? "volume"
+                    : "weight",
+
+            total:
+                Math.max(
+                    weightCost,
+                    volumeCost
+                ),
+
+            weightCost,
+            volumeCost,
+            volumeM3,
+            rate,
+            volumeRate:
+                autoTariff.volumeRate,
+
+            branch,
+            mode,
+            eta:
+                autoTariff.eta,
+
+            values,
+
+            message:
+                costsEqual
+                    ? "Арзиши вазн ва ҳаҷм баробар баромад. Натиҷа аз рӯи вазн нишон дода шуд."
+                    : useVolume
+                        ? "Бори шумо аз рӯи ҳаҷм (куб) ҳисоб мешавад, зеро арзиши ҳаҷмӣ бештар аст."
+                        : "Бори шумо аз рӯи вазн (кг) ҳисоб мешавад, зеро арзиши вазнӣ бештар аст."
+        };
+    }
+
+    function showEmptyResult() {
+        resultEmpty.hidden = false;
+        resultSuccess.hidden = true;
+        delete resultCard.dataset.method;
+    }
+
+    function showCalculatedResult(result) {
+        resultEmpty.hidden = true;
+        resultSuccess.hidden = false;
+
+        resultCard.dataset.method =
+            result.method;
+
+        resultAmount.textContent =
+            `${moneyFormatter.format(
+                result.total
+            )} сомонӣ`;
+
+        resultMethod.dataset.method =
+            result.method;
+
+        resultMethod.textContent =
+            result.method === "volume"
+                ? "Бо ҳаҷм ҳисоб шуд"
+                : "Бо вазн ҳисоб шуд";
+
+        resultMeta.textContent =
+            `${result.branch.name} • ` +
+            `${modeLabels[result.mode]} • ` +
+            `${result.eta}`;
+
+        resultWeightLabel.textContent =
+            `${numberFormatter.format(
+                result.values.weight
+            )} кг × ` +
+            `${numberFormatter.format(
+                result.rate
+            )} сомонӣ`;
+
+        resultWeightValue.textContent =
+            `${moneyFormatter.format(
+                result.weightCost
+            )} сомонӣ`;
+
+        if (
+            result.volumeCost === null
+        ) {
+            resultVolumeLabel.textContent =
+                "Ҳаҷми ҳисобшуда";
+
+            resultVolumeValue.textContent =
+                `${volumeFormatter.format(
+                    result.volumeM3
+                )} м³ — ба нарх таъсир надорад`;
+        } else {
+            resultVolumeLabel.textContent =
+                `${volumeFormatter.format(
+                    result.volumeM3
+                )} м³ × ` +
+                `${numberFormatter.format(
+                    result.volumeRate
+                )} сомонӣ`;
+
+            resultVolumeValue.textContent =
+                `${moneyFormatter.format(
+                    result.volumeCost
+                )} сомонӣ`;
+        }
+
+        resultMessage.textContent =
+            result.message;
+    }
+
+    function updateCalculator({
+        forceErrors = false,
+        focusFirst = false,
+        scrollToResult = false
+    } = {}) {
+        const validation =
+            validate();
+
+        if (!validation.valid) {
+            showEmptyResult();
+
+            if (
+                forceErrors ||
+                state.attempted ||
+                state.hasResult
+            ) {
+                showErrors(
+                    validation.errors,
+                    focusFirst
+                );
+            } else {
+                clearErrors();
+            }
+
+            return;
+        }
+
+        clearErrors();
+
+        const result =
+            calculate(
+                validation.values
+            );
+
+        showCalculatedResult(result);
+
+        state.hasResult = true;
+
+        if (
+            scrollToResult &&
+            window.innerWidth < 1024
+        ) {
+            const reduceMotion =
+                window.matchMedia(
+                    "(prefers-reduced-motion: reduce)"
+                ).matches;
+
+            resultCard.scrollIntoView({
+                behavior:
+                    reduceMotion
+                        ? "auto"
+                        : "smooth",
+
+                block: "center"
+            });
+        }
+    }
+
+    branchButtons.forEach((button) => {
+        button.addEventListener(
+            "click",
+            () => {
+                state.branch =
+                    button.dataset.calcBranch;
+
+                state.mode =
+                    state.branch === "dushanbe"
+                        ? null
+                        : "auto";
+
+                state.hasResult = false;
+
+                syncControls();
+                updateCalculator();
+            }
+        );
+    });
+
+    modeButtons.forEach((button) => {
+        button.addEventListener(
+            "click",
+            () => {
+                state.mode =
+                    button.dataset.calcMode;
+
+                syncControls();
+                updateCalculator();
+            }
+        );
+    });
+
+    unitButtons.forEach((button) => {
+        button.addEventListener(
+            "click",
+            () => {
+                state.unit =
+                    button.dataset.calcUnit;
+
+                syncControls();
+                updateCalculator();
+            }
+        );
+    });
+
+    Object.values(inputs).forEach((input) => {
+        input.addEventListener(
+            "input",
+            () => {
+                updateCalculator();
+            }
+        );
+    });
+
+    form.addEventListener(
+        "submit",
+        (event) => {
+            event.preventDefault();
+
+            state.attempted = true;
+
+            updateCalculator({
+                forceErrors: true,
+                focusFirst: true,
+                scrollToResult: true
+            });
+        }
+    );
+
+    syncControls();
+    showEmptyResult();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        initCargoCalculator,
+        {
+            once: true
+        }
+    );
+} else {
+    initCargoCalculator();
+}
