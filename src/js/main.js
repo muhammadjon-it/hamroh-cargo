@@ -1820,3 +1820,75 @@ if (document.readyState === "loading") {
 } else {
     initCargoCalculator();
 }
+
+function initContactForm() {
+    const form = document.getElementById("contact-form");
+
+    if (!form || form.dataset.contactReady === "true") {
+        return;
+    }
+
+    form.dataset.contactReady = "true";
+
+    const nameInput = document.getElementById("contact-name");
+    const phoneInput = document.getElementById("contact-phone");
+    const messageInput = document.getElementById("contact-message");
+    const note = document.getElementById("contact-form-note");
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+            form.classList.add("contact-form-invalid");
+            form.reportValidity();
+            return;
+        }
+
+        form.classList.remove("contact-form-invalid");
+
+        const message = [
+            "Салом! Ман аз сомонаи Hamroh Cargo менависам.",
+            "",
+            `Ном: ${nameInput.value.trim()}`,
+            `Телефон: ${phoneInput.value.trim()}`,
+            `Паём: ${messageInput.value.trim()}`
+        ].join("\n");
+
+        const url = `https://wa.me/992501222235?text=${encodeURIComponent(message)}`;
+        const whatsappWindow = window.open(url, "_blank");
+
+        if (whatsappWindow) {
+            whatsappWindow.opener = null;
+        } else {
+            window.location.href = url;
+        }
+
+        if (note) {
+            note.textContent = "WhatsApp бо паёми омода кушода шуд.";
+            note.classList.add("is-success");
+        }
+    });
+
+    [nameInput, phoneInput, messageInput].forEach((input) => {
+        input.addEventListener("input", () => {
+            if (input.validity.valid) {
+                input.closest(".contact-input-wrap, .contact-textarea-wrap")?.classList.remove("is-invalid");
+            }
+
+            if (note?.classList.contains("is-success")) {
+                note.textContent = "Маълумоти шумо дар сомона нигоҳ дошта намешавад.";
+                note.classList.remove("is-success");
+            }
+        });
+
+        input.addEventListener("invalid", () => {
+            input.closest(".contact-input-wrap, .contact-textarea-wrap")?.classList.add("is-invalid");
+        });
+    });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initContactForm, { once: true });
+} else {
+    initContactForm();
+}
