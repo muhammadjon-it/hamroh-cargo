@@ -110,7 +110,9 @@ function initBranchesSection() {
                         Дар харита нишон додан
 
                         <span class="branch-list-arrow">
-                            →
+                            <svg class="ui-icon" aria-hidden="true">
+                                <use href="#icon-arrow-right"></use>
+                            </svg>
                         </span>
                     </span>
                 </span>
@@ -312,7 +314,10 @@ function initBranchesSection() {
                     href="${getMapsUrl(branch)}"
                     target="_blank"
                     rel="noopener noreferrer">
-                    Масирро кушодан →
+                    Масирро кушодан
+                    <svg class="ui-icon" aria-hidden="true">
+                        <use href="#icon-arrow-up-right"></use>
+                    </svg>
                 </a>
             </div>
         `;
@@ -844,8 +849,10 @@ function initTariffsSection() {
             pricePanel.innerHTML = `
                 <div class="tariff-update-state">
                     <div>
-                        <div class="tariff-update-icon">
-                            ${service.label === "Авиа" ? "✈" : "↻"}
+                        <div class="tariff-update-icon" aria-hidden="true">
+                            <svg class="ui-icon">
+                                <use href="#icon-refresh"></use>
+                            </svg>
                         </div>
 
                         <h4>Нархҳо дар ҳоли навсозӣ</h4>
@@ -907,7 +914,9 @@ function initTariffsSection() {
 ${service.note
                 ? `
             <div class="tariff-service-note">
-                <span>i</span>
+                <span aria-hidden="true">
+                    <svg class="ui-icon"><use href="#icon-info"></use></svg>
+                </span>
                 <p>${service.note}</p>
             </div>
         `
