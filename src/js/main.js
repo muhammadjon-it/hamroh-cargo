@@ -1658,29 +1658,19 @@ function initCargoCalculator() {
                 result.weightCost
             )} сомонӣ`;
 
-        if (
-            result.volumeCost === null
-        ) {
+        const resultVolumeRow =
+            resultVolumeLabel.parentElement;
+
+        resultVolumeRow.hidden =
+            result.volumeCost === null;
+
+        if (result.volumeCost !== null) {
             resultVolumeLabel.textContent =
-                "Ҳаҷми ҳисобшуда";
+                `${volumeFormatter.format(result.volumeM3)} м³ × ` +
+                `${numberFormatter.format(result.volumeRate)} сомонӣ`;
 
             resultVolumeValue.textContent =
-                `${volumeFormatter.format(
-                    result.volumeM3
-                )} м³ — ба нарх таъсир надорад`;
-        } else {
-            resultVolumeLabel.textContent =
-                `${volumeFormatter.format(
-                    result.volumeM3
-                )} м³ × ` +
-                `${numberFormatter.format(
-                    result.volumeRate
-                )} сомонӣ`;
-
-            resultVolumeValue.textContent =
-                `${moneyFormatter.format(
-                    result.volumeCost
-                )} сомонӣ`;
+                `${moneyFormatter.format(result.volumeCost)} сомонӣ`;
         }
 
         resultMessage.textContent =

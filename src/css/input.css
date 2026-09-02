@@ -1845,9 +1845,9 @@
     margin-top: 18px;
 }
 
-.cargo-calc-breakdown>div {
+.cargo-calc-breakdown > div {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1859,16 +1859,19 @@
 }
 
 .cargo-calc-breakdown span {
+    flex: 1;
+    min-width: 0;
     color: #bfdbfe;
     font-size: 10px;
     line-height: 1.45;
 }
 
 .cargo-calc-breakdown strong {
-    flex-shrink: 0;
+    min-width: 0;
     text-align: right;
     font-size: 12px;
     font-weight: 900;
+    overflow-wrap: anywhere;
 }
 
 .cargo-calc-result-message {
